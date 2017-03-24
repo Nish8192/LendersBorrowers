@@ -1,0 +1,73 @@
+<style type="text/css">
+.tg  {border-collapse:collapse;border-spacing:0;}
+.tg td{font-family:Arial, sans-serif;font-size:14px;padding:10px 5px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;}
+.tg th{font-family:Arial, sans-serif;font-size:14px;font-weight:normal;padding:10px 5px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;}
+.tg .tg-m1tb{font-weight:bold;background-color:#000000;color:#ffffff;text-align:center;vertical-align:top}
+.tg .tg-yw4l{vertical-align:top}
+</style>
+
+<h3>Name: <%= current_user.first_name%> <%= current_user.last_name%></h3>
+<h3>Account Balance: $<%= @balance = current_user.money - @lent%></h3>
+
+<h4>List of People Who Need Your Help!!</h4>
+<table class="tg">
+  <tr>
+    <th class="tg-m1tb">Name</th>
+    <th class="tg-m1tb">Money Needed For</th>
+    <th class="tg-m1tb">Description</th>
+    <th class="tg-m1tb">Amount Needed</th>
+    <th class="tg-m1tb">Amount Raised</th>
+    <th class="tg-m1tb">Action</th>
+  </tr>
+  <% if @borrowers %>
+  <% @borrowers.each do |borrower|%>
+  <tr>
+    <td class="tg-yw4l"><%= borrower.first_name %> <%= borrower.last_name %></td>
+    <td class="tg-yw4l"><%= borrower.reason %></td>
+    <td class="tg-yw4l"><%= borrower.description %></td>
+    <td class="tg-yw4l"><%= borrower.needed %></td>
+    <td class="tg-yw4l"><%
+        @raised = 0
+        borrower.loans.each do |loan|
+        @raised += loan.amount%><%end%><%=@raised%></td>
+    <td class="tg-yw4l"><form action="/loans/create/<%=borrower.id%>" method="post">
+        <input type="hidden" name="authenticity_token" value="<%= form_authenticity_token %>">
+        <select name="loan_amount">
+            <option value=100>100</option>
+            <option value=200>200</option>
+            <option value=300>300</option>
+            <option value=400>400</option>
+            <option value=500>500</option>
+        </select>
+        <% if @balance > 0%><input type="submit" value="Lend"><%end%></form></td>
+  </tr>
+  <%end%>
+  <%end%>
+</table>
+<br>
+<h4>People You've Already Helped!</h4>
+<table class="tg">
+  <tr>
+    <th class="tg-m1tb">Name</th>
+    <th class="tg-m1tb">Money Needed For</th>
+    <th class="tg-m1tb">Description</th>
+    <th class="tg-m1tb">Amount Needed</th>
+    <th class="tg-m1tb">Lent</th>
+  </tr>
+  <% if @borrowers %>
+  <% @borrowers.each do |debtor|%>
+  <tr>
+      <% if current_user.debtors.exists?(debtor) %>
+    <td class="tg-yw4l"><%=debtor.first_name%> <%=debtor.last_name%></td>
+    <td class="tg-yw4l"><%=debtor.reason%></td>
+    <td class="tg-yw4l"><%=debtor.description%></td>
+    <td class="tg-yw4l"><%=debtor.needed%></td>
+    <td class="tg-yw4l"><%
+        @lent = 0
+        debtor.loans.each do |loan|
+        @lent += loan.amount%><%end%><%=@lent%></td>
+  </tr>
+  <% end %>
+  <%end%>
+  <%end%>
+</table>
